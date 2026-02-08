@@ -7,6 +7,7 @@ use log::info;
 mod config;
 mod health;
 mod kv_store;
+mod view;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -24,6 +25,7 @@ async fn main() -> std::io::Result<()> {
             .service(health::health)
             .service(kv_store::get_kv)
             .service(kv_store::set_kv)
+            .service(view::index)
     })
     .bind(config.adress())?
     .run()
