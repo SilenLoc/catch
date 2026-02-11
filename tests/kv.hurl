@@ -16,3 +16,9 @@ body contains "world"
 # todo make this run, it should be possible to select this
 # the problem is that the response is not json but a json string.
 #jsonpath "$.hello" == "world"
+
+DELETE {{target}}/kv/key1
+HTTP 204
+
+GET {{target}}/kv/key1
+HTTP 404
