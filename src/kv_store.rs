@@ -1,6 +1,8 @@
+use actix_web::http::header::ContentType;
 use std::{collections::HashMap, sync::Mutex};
 
 use actix_web::{HttpRequest, HttpResponse, Responder, get, http::header::HeaderValue, post, web};
+use serde_json::Value;
 
 pub type KeyValueStore = Mutex<HashMap<String, HashMap<String, String>>>;
 
@@ -24,15 +26,30 @@ pub async fn get_kv(
 
     let store = store.lock().unwrap();
 
+    // check if context exists
     let Some(inner) = store.get(context) else {
-        // no context found, means key not found
         return HttpResponse::NotFound().body("Key not found");
     };
 
-    match inner.get(&key.clone()) {
-        // todo return the value as a string
-        Some(value) => HttpResponse::Ok().json(value),
-        None => HttpResponse::NotFound().body("Key not found"),
+    // check if key exists
+    let Some(value) = inner.get(&key.clone()) else {
+        return HttpResponse::NotFound().body("Key not found");
+    };
+
+    // check if value is json, else return as plaintext
+    let Ok(json) = serde_json::from_str::<Value>(value) else {
+        return HttpResponse::Ok()
+            .content_type(ContentType::plaintext())
+            .body(value.clone());
+    };
+
+    // return json objects and arrays as json, else plaintext (number, string, boolean)
+    match json {
+        Value::Object(obj) => HttpResponse::Ok().json(obj),
+        Value::Array(arr) => HttpResponse::Ok().json(arr),
+        _ => HttpResponse::Ok()
+            .content_type(ContentType::plaintext())
+            .body(value.clone()),
     }
 }
 

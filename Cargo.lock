@@ -330,6 +330,7 @@ dependencies = [
  "env_logger",
  "log",
  "maud",
+ "serde_json",
 ]
 
 [[package]]
