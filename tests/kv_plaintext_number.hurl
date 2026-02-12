@@ -11,3 +11,10 @@ HTTP 200
 [Asserts]
 header "Content-Type" contains "text/plain"
 body == "123"
+
+
+DELETE {{target}}/kv/test-plaintext-number
+HTTP 204
+
+GET {{target}}/kv/test-plaintext-number
+HTTP 404
