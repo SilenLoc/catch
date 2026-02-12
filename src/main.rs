@@ -29,6 +29,9 @@ async fn main() -> std::io::Result<()> {
             .service(kv_store::set_kv)
             .service(kv_store::delete_kv)
             .service(view::index)
+            .service(view::key_value::kv_page)
+            .service(view::proxy::proxy_page)
+            .service(view::script::script_page)
     })
     .bind(config.adress())?
     .run()
