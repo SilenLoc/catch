@@ -1,17 +1,16 @@
-use actix_web::{HttpRequest, HttpResponse, Responder, post};
+use actix_web::{HttpMessage, HttpRequest, HttpResponse, Responder, post};
 use runtime::{Run, RuntimeError, javascript::JavaScriptRuntime};
 pub mod runtime;
 
 #[post("/script")]
 pub async fn run(req: HttpRequest, script: String) -> impl Responder {
-    let language = req
-        .headers()
-        .get("Content-Type")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("application/javascript")
-        .to_string();
+    let content_type = if req.content_type().is_empty() {
+        "application/javascript"
+    } else {
+        req.content_type()
+    };
 
-    let result: Result<String, RuntimeError> = match language.as_str() {
+    let result: Result<String, RuntimeError> = match content_type {
         "application/javascript" => JavaScriptRuntime.run(req, script),
         _ => Err(RuntimeError::UserError(
             "Supported Content-Types: [application/javascript]".to_owned(),
