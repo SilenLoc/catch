@@ -1,10 +1,13 @@
 use super::{Run, RuntimeError};
 use actix_web::HttpRequest;
-use ion::*;
+use ion::{
+    JsFunction, JsObject, JsObjectValue, JsRuntime, JsRuntimeOptions, JsString, JsUnknown, JsValue,
+    JsWorkerOptions,
+};
 
 pub struct JavaScriptRuntime;
 impl Run for JavaScriptRuntime {
-    fn run(&self, _req: HttpRequest, script: String) -> core::result::Result<String, RuntimeError> {
+    fn run(&self, _req: HttpRequest, script: String) -> Result<String, RuntimeError> {
         // Initialize JavaScript runtime & context
         let runtime = JsRuntime::initialize_once(JsRuntimeOptions {
             transformers: vec![
@@ -22,15 +25,15 @@ impl Run for JavaScriptRuntime {
             ],
             ..Default::default()
         })
-        .map_err(|e| {
+        .map_err(|_| {
             RuntimeError::InternalError("JavaScript Runtime initialization failed".to_owned())
         })?;
         let worker = runtime
             .spawn_worker(JsWorkerOptions::default())
-            .map_err(|e| {
+            .map_err(|_| {
                 RuntimeError::InternalError("JavaScript Worker initialization failed".to_owned())
             })?;
-        let context = worker.create_context().map_err(|e| {
+        let context = worker.create_context().map_err(|_| {
             RuntimeError::InternalError("JavaScript Context initialization failed".to_owned())
         })?;
 
@@ -50,7 +53,7 @@ impl Run for JavaScriptRuntime {
                 // - return format should be "foo" (with quotation marks), remove this if-block (stringify will add quotation marks later on)
                 if type_repr == "string" {
                     let s = value.cast::<JsString>()?;
-                    return Ok(s.get_string()?);
+                    return s.get_string();
                 }
 
                 // Otherwise return value as json
@@ -58,7 +61,7 @@ impl Run for JavaScriptRuntime {
                 let json = global_this.get_named_property_unchecked::<JsObject>("JSON")?;
                 let stringify = json.get_named_property_unchecked::<JsFunction>("stringify")?;
                 let result: JsString = stringify.call_with_args(value)?;
-                Ok(result.get_string()?)
+                result.get_string()
             })
             .map_err(|e| RuntimeError::UserError(e.to_string()))
     }
