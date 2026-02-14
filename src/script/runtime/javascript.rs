@@ -4,7 +4,7 @@ use ion::*;
 
 pub struct JavaScriptRuntime;
 impl Run for JavaScriptRuntime {
-    fn run(&self, _req: HttpRequest, value: String) -> core::result::Result<String, RuntimeError> {
+    fn run(&self, _req: HttpRequest, script: String) -> core::result::Result<String, RuntimeError> {
         // Initialize JavaScript runtime & context
         let runtime = JsRuntime::initialize_once(JsRuntimeOptions {
             transformers: vec![
@@ -37,7 +37,7 @@ impl Run for JavaScriptRuntime {
         // Run JavaScript and return based on result
         context
             .exec_blocking(move |env| {
-                let value = env.eval_script::<JsUnknown>(&value)?;
+                let value = env.eval_script::<JsUnknown>(&script)?;
 
                 // Catch "null" or "undefined"
                 let type_repr = value.value().type_repr();
@@ -45,7 +45,9 @@ impl Run for JavaScriptRuntime {
                     return Ok(type_repr.to_string());
                 }
 
-                // CLARIFICATION: should string be returned as foo or "foo"
+                // TODO: Clarify, if string should be returned as foo or "foo"
+                // - return format should be foo (without quotation marks), leave as is
+                // - return format should be "foo" (with quotation marks), remove this if-block (stringify will add quotation marks later on)
                 if type_repr == "string" {
                     let s = value.cast::<JsString>()?;
                     return Ok(s.get_string()?);

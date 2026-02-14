@@ -8,5 +8,5 @@ pub enum RuntimeError {
 }
 
 pub trait Run {
-    fn run(&self, req: HttpRequest, value: String) -> Result<String, RuntimeError>;
+    fn run(&self, req: HttpRequest, script: String) -> Result<String, RuntimeError>;
 }
