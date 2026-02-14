@@ -106,3 +106,13 @@ HTTP 200
 
 [Asserts]
 body == "null"
+
+
+# Testing Input Errors
+# TODO: Currently the crate "ion" is panicking when an invalid script is run instead of bubbling the error
+#POST {{target}}/script
+#```
+#	let x = x;
+#	x
+#```
+#HTTP 400

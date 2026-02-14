@@ -1,10 +1,10 @@
-use super::Run;
+use super::{Run, RuntimeError};
 use actix_web::HttpRequest;
 use ion::*;
 
 pub struct JavaScriptRuntime;
 impl Run for JavaScriptRuntime {
-    fn run(&self, _req: HttpRequest, value: String) -> core::result::Result<String, String> {
+    fn run(&self, _req: HttpRequest, value: String) -> core::result::Result<String, RuntimeError> {
         // Initialize JavaScript runtime & context
         let runtime = JsRuntime::initialize_once(JsRuntimeOptions {
             transformers: vec![
@@ -22,11 +22,17 @@ impl Run for JavaScriptRuntime {
             ],
             ..Default::default()
         })
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| {
+            RuntimeError::InternalError("JavaScript Runtime initialization failed".to_owned())
+        })?;
         let worker = runtime
             .spawn_worker(JsWorkerOptions::default())
-            .map_err(|e| e.to_string())?;
-        let context = worker.create_context().map_err(|e| e.to_string())?;
+            .map_err(|e| {
+                RuntimeError::InternalError("JavaScript Worker initialization failed".to_owned())
+            })?;
+        let context = worker.create_context().map_err(|e| {
+            RuntimeError::InternalError("JavaScript Context initialization failed".to_owned())
+        })?;
 
         // Run JavaScript and return based on result
         context
@@ -52,6 +58,6 @@ impl Run for JavaScriptRuntime {
                 let result: JsString = stringify.call_with_args(value)?;
                 Ok(result.get_string()?)
             })
-            .map_err(|e| e.to_string())
+            .map_err(|e| RuntimeError::UserError(e.to_string()))
     }
 }
