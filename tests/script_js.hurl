@@ -82,6 +82,9 @@ HTTP 200
 
 [Asserts]
 body == "{\"name\":\"Muster\",\"date_of_birth\":\"1900-01-01\"}"
+jsonpath "$.name" == "Muster"
+jsonpath "$.date_of_birth" == "1900-01-01"
+jsonpath "$.name" == "Muster"
 
 
 # Testing Undefined

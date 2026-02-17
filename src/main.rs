@@ -8,6 +8,7 @@ mod assets;
 mod config;
 mod health;
 mod kv_store;
+mod runtime;
 mod script;
 mod view;
 
