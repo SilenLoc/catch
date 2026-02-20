@@ -30,7 +30,7 @@ impl KeyValueView {
 
 #[get("/ui/kv")]
 pub async fn kv_page(store: web::Data<KeyValueStore>) -> AwResult<maud::Markup> {
-    let kv_snapshot = store.get_ref().lock().unwrap().clone();
+    let kv_snapshot = store
 
     Ok(KeyValueView::render(&kv_snapshot))
 }

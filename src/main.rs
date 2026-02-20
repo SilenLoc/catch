@@ -4,6 +4,8 @@ use actix_web::{App, HttpServer, web};
 use env_logger::Env;
 use log::info;
 
+use crate::kv_store::KeyValueStore;
+
 mod assets;
 mod config;
 mod health;
@@ -20,7 +22,7 @@ async fn main() -> std::io::Result<()> {
 
     info!("{config}");
 
-    let data = web::Data::new(kv_store::new());
+    let data = web::Data::new(KeyValueStore::new());
 
     HttpServer::new(move || {
         App::new()

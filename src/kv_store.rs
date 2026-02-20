@@ -4,10 +4,89 @@ use std::{collections::HashMap, sync::Mutex};
 use actix_web::{HttpRequest, HttpResponse, Responder, get, http::header::HeaderValue, post, web};
 use serde_json::Value;
 
-pub type KeyValueStore = Mutex<HashMap<String, HashMap<String, String>>>;
+use crate::script::Script;
 
-pub fn new() -> KeyValueStore {
-    Mutex::new(HashMap::new())
+pub type KeyValueStoreInner = Mutex<HashMap<String, HashMap<String, String>>>;
+pub type KeyValueStore = KeyValueStoreWrapper;
+
+pub struct KeyValueStoreWrapper {
+    store: KeyValueStoreInner,
+}
+
+const SCRIPT_CONTEXT: &str = "_catch_script";
+
+impl KeyValueStore {
+    pub fn new() -> Self {
+        Self {
+            store: Mutex::new(HashMap::new()),
+        }
+    }
+
+    pub fn get(&self, context: impl Into<String>, key: impl Into<String>) -> Option<String> {
+        let store = self.store.lock().unwrap();
+        store
+            .get(&context.into())
+            .and_then(|inner| inner.get(&key.into()).cloned())
+    }
+
+    pub fn insert(
+        &self,
+        context: impl Into<String>,
+        key: impl Into<String>,
+        value: impl Into<String>,
+    ) -> Result<String, String> {
+        let mut store = self.store.lock().unwrap();
+
+        let context: String = context.into().clone();
+        let Some(inner) = store.get_mut(&context) else {
+            // no context found, create context
+            let mut k = HashMap::new();
+            k.insert(key.into(), value.into());
+            store.insert(context.into(), k);
+            return Ok("Key Set".into());
+        };
+
+        inner.insert(key.into(), value.into());
+
+        Ok("Key Set".into())
+    }
+
+    pub fn remove(
+        &self,
+        context: impl Into<String>,
+        key: impl Into<String>,
+    ) -> Result<String, String> {
+        let mut store = self.store.lock().unwrap();
+
+        let Some(inner) = store.get_mut(&context.into()) else {
+            // no context found, create context
+            return Ok("Key did not exist".into());
+        };
+
+        inner.remove(&key.into());
+
+        Ok("Key Removed".into())
+    }
+
+    pub fn get_script(&self, name: impl Into<String>) -> Result<Script, String> {
+        let Some(json) = self.get(SCRIPT_CONTEXT, &name.into()) else {
+            return Err("Script not found".into());
+        };
+        let s = Script::from_json(&json).map_err(|e| e.to_string())?;
+        Ok(s)
+    }
+
+    pub fn insert_script(&self, script_with_result: Script) -> Result<String, String> {
+        self.insert(
+            SCRIPT_CONTEXT,
+            script_with_result.name(),
+            script_with_result.as_json(),
+        )
+    }
+
+    pub fn inner(&self) -> &KeyValueStoreInner {
+        &self.store
+    }
 }
 
 #[get("/kv/{key}")]
@@ -24,20 +103,13 @@ pub async fn get_kv(
         .to_str()
         .unwrap();
 
-    let store = store.lock().unwrap();
-
-    // check if context exists
-    let Some(inner) = store.get(context) else {
-        return HttpResponse::NotFound().body("Key not found");
-    };
-
     // check if key exists
-    let Some(value) = inner.get(&key.clone()) else {
+    let Some(value) = store.get(context, &key.clone()) else {
         return HttpResponse::NotFound().body("Key not found");
     };
 
     // check if value is json, else return as plaintext
-    let Ok(json) = serde_json::from_str::<Value>(value) else {
+    let Ok(json) = serde_json::from_str::<Value>(&value) else {
         return HttpResponse::Ok()
             .content_type(ContentType::plaintext())
             .body(value.clone());
@@ -68,18 +140,7 @@ pub async fn set_kv(
         .to_str()
         .unwrap();
 
-    let mut store = store.lock().unwrap();
-
-    let Some(inner) = store.get_mut(context) else {
-        // no context found, create context
-        let mut k = HashMap::new();
-        k.insert(key.clone(), value);
-        store.insert(context.to_string(), k);
-        return HttpResponse::Ok().body("Key set");
-    };
-
-    inner.insert(key.clone(), value);
-
+    store.insert(context, key.clone(), value);
     HttpResponse::Ok().body("Key set")
 }
 
@@ -97,12 +158,7 @@ pub async fn delete_kv(
         .to_str()
         .unwrap();
 
-    let mut store = store.lock().unwrap();
-
-    let Some(inner) = store.get_mut(context) else {
-        return HttpResponse::NoContent();
-    };
-
-    inner.remove(&key.to_string());
+    let key: String = key.to_string();
+    store.remove(context, key);
     HttpResponse::NoContent()
 }
