@@ -18,6 +18,10 @@ pub fn render_layout(main_content: &maud::Markup) -> maud::Markup {
                 title { "catch" }
                 link rel="stylesheet" href="/assets/t.css" {}
                 script src="/assets/h.js" {}
+                // Prism.js for syntax highlighting (vendored)
+                link rel="stylesheet" href="/assets/prism-tomorrow.min.css" {}
+                script src="/assets/prism.min.js" {}
+                script src="/assets/prism-javascript.min.js" {}
             }
 
             body class="min-vh-100 bg-near-black near-white sans-serif" {

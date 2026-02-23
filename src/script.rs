@@ -1,7 +1,11 @@
-use crate::runtime::{self, ScriptType};
+use crate::{
+    kv_store::KeyValueStore,
+    runtime::{self, ScriptLanguage, ScriptType},
+};
 
 use super::runtime::RuntimeError;
-use actix_web::{HttpMessage, HttpRequest, HttpResponse, Responder, body::BoxBody, post};
+use actix_web::{HttpMessage, HttpRequest, HttpResponse, Responder, body::BoxBody, post, web};
+use serde::{Deserialize, Serialize};
 
 struct RequestAndScript<'a> {
     pub request: &'a HttpRequest,
@@ -39,7 +43,11 @@ impl Responder for RuntimeError {
 }
 
 #[post("/script")]
-pub async fn run(req: HttpRequest, script: String) -> impl Responder {
+pub async fn run(
+    req: HttpRequest,
+    script: String,
+    store: web::Data<KeyValueStore>,
+) -> impl Responder {
     let input = RequestAndScript {
         request: &req,
         script: &script,
@@ -51,10 +59,67 @@ pub async fn run(req: HttpRequest, script: String) -> impl Responder {
         Ok(script_type) => {
             let result = script_type.run();
             match result {
-                Ok(result) => HttpResponse::Ok().body(result),
+                Ok(result) => {
+                    let language = script_type.language();
+                    let s = Script::new(script, result.clone(), language);
+                    let _ = store.insert_script(&s);
+                    HttpResponse::Ok().body(result)
+                }
                 Err(error) => error.respond_to(&req),
             }
         }
         Err(error) => error.respond_to(&req),
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Script {
+    name: String,
+    content: String,
+    result: String,
+    language: ScriptLanguage,
+}
+
+impl Script {
+    pub fn new(content: String, result: String, language: ScriptLanguage) -> Self {
+        let name = script_name(&content);
+        Script {
+            name,
+            content,
+            result,
+            language,
+        }
+    }
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn content(&self) -> &str {
+        &self.content
+    }
+
+    pub fn result(&self) -> &str {
+        &self.result
+    }
+
+    pub fn language(&self) -> &ScriptLanguage {
+        &self.language
+    }
+
+    pub fn as_json(&self) -> String {
+        serde_json::to_string(self).unwrap()
+    }
+
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json)
+    }
+}
+
+fn script_name(script_file: &str) -> String {
+    script_file
+        .lines()
+        .take(1)
+        .collect::<String>()
+        .trim()
+        .replace("//", "")
 }

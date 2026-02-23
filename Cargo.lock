@@ -434,6 +434,7 @@ dependencies = [
  "ion",
  "log",
  "maud",
+ "serde",
  "serde_json",
 ]
 
