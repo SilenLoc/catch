@@ -62,7 +62,7 @@ pub async fn run(
                 Ok(result) => {
                     let language = script_type.language();
                     let s = Script::new(script, result.clone(), language);
-                    let _ = store.insert_script(s);
+                    let _ = store.insert_script(&s);
                     HttpResponse::Ok().body(result)
                 }
                 Err(error) => error.respond_to(&req),
@@ -77,17 +77,17 @@ pub struct Script {
     name: String,
     content: String,
     result: String,
-    script_type: ScriptLanguage,
+    language: ScriptLanguage,
 }
 
 impl Script {
-    pub fn new(content: String, result: String, script_type: ScriptLanguage) -> Self {
+    pub fn new(content: String, result: String, language: ScriptLanguage) -> Self {
         let name = script_name(&content);
         Script {
             name,
             content,
             result,
-            script_type,
+            language,
         }
     }
     pub fn name(&self) -> &str {
@@ -102,8 +102,8 @@ impl Script {
         &self.result
     }
 
-    pub fn script_type(&self) -> &ScriptLanguage {
-        &self.script_type
+    pub fn language(&self) -> &ScriptLanguage {
+        &self.language
     }
 
     pub fn as_json(&self) -> String {

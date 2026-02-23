@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use actix_web::Result as AwResult;
 use actix_web::{get, web};
-use maud::{html, PreEscaped};
+use maud::{PreEscaped, html};
 
 use crate::kv_store::KeyValueStore;
 
@@ -45,14 +45,14 @@ fn render_hash_map(hash_map: HashMap<String, String>) -> maud::Markup {
                     li class="flex items-baseline pv2 bt b--black-40 relative" {
                         div class="w-40 pr3 flex items-center" {
                             span class="f6 fw6 light-gray truncate flex-auto" { (key) }
-                            button class="copy-btn bn br2 ph2 pv1 f7 fw6 bg-moon-gray near-black pointer transition ml2 flex-shrink-0" 
+                            button class="copy-btn bn br2 ph2 pv1 f7 fw6 bg-moon-gray near-black pointer transition ml2 flex-shrink-0"
                                    onclick={ "copyToClipboard(this, '" (&key.replace('\'', "\\'")) "')" } {
                                 "Copy"
                             }
                         }
                         div class="w-60 flex items-center" {
                             span class="f6 lh-copy near-white flex-auto" { (value) }
-                            button class="copy-btn bn br2 ph2 pv1 f7 fw6 bg-moon-gray near-black pointer transition ml2 flex-shrink-0" 
+                            button class="copy-btn bn br2 ph2 pv1 f7 fw6 bg-moon-gray near-black pointer transition ml2 flex-shrink-0"
                                    onclick={ "copyToClipboard(this, '" (&value.replace('\'', "\\'")) "')" } {
                                 "Copy"
                             }
@@ -60,8 +60,8 @@ fn render_hash_map(hash_map: HashMap<String, String>) -> maud::Markup {
                     }
                 }
             }
-            
-            script { 
+
+            script {
                 (PreEscaped("
                     function copyToClipboard(btn, text) {
                         navigator.clipboard.writeText(text).then(function() {

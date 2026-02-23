@@ -1,6 +1,6 @@
 use actix_web::Result as AwResult;
 use actix_web::{get, web};
-use maud::{html, PreEscaped};
+use maud::{PreEscaped, html};
 
 use crate::kv_store::KeyValueStore;
 use crate::runtime::ScriptLanguage;
@@ -26,20 +26,20 @@ impl ScriptView {
                         section class="bg-dark-gray br3 pa3 pa4-ns mv3 shadow-1" {
                             div class="flex items-center justify-between mb3 pb2 bb b--black-40" {
                                 h3 class="f5 fw6 light-silver ma0" { (script.name()) }
-                                span class="f7 fw6 ttu tracked ph2 pv1 br2 bg-gold near-black" { (script.script_type().as_str()) }
+                                span class="f7 fw6 ttu tracked ph2 pv1 br2 bg-gold near-black" { (script.language().as_str()) }
                             }
-                            
+
                             div class="flex flex-wrap flex-nowrap-ns gap3" {
                                 // Script content (left side)
                                 div class="w-100 w-50-ns pr3-ns" {
                                     div class="flex items-center justify-between mb2" {
                                         h4 class="f6 ttu tracked moon-gray ma0" { "Script" }
-                                        button class="copy-btn bn br2 ph2 pv1 f7 fw6 bg-moon-gray near-black pointer transition" 
+                                        button class="copy-btn bn br2 ph2 pv1 f7 fw6 bg-moon-gray near-black pointer transition"
                                                onclick={ "copyToClipboard(this, " (PreEscaped(&format!("'{}'", script.content().replace('\'', "\\'").replace('\n', "\\n")))) ")" } {
                                             "Copy"
                                         }
                                     }
-                                    @if script.script_type() == &ScriptLanguage::JavaScript {
+                                    @if script.language() == &ScriptLanguage::JavaScript {
                                         pre class="br2 ma0" {
                                             code class="language-javascript f7" { (script.content()) }
                                         }
@@ -49,12 +49,12 @@ impl ScriptView {
                                         }
                                     }
                                 }
-                                
+
                                 // Result (right side)
                                 div class="w-100 w-50-ns pl3-ns mt3 mt0-ns" {
                                     div class="flex items-center justify-between mb2" {
                                         h4 class="f6 ttu tracked moon-gray ma0" { "Result" }
-                                        button class="copy-btn bn br2 ph2 pv1 f7 fw6 bg-moon-gray near-black pointer transition" 
+                                        button class="copy-btn bn br2 ph2 pv1 f7 fw6 bg-moon-gray near-black pointer transition"
                                                onclick={ "copyToClipboard(this, " (PreEscaped(&format!("'{}'", script.result().replace('\'', "\\'").replace('\n', "\\n")))) ")" } {
                                             "Copy"
                                         }
@@ -67,9 +67,9 @@ impl ScriptView {
                         }
                     }
                 }
-                
+
                 // Trigger Prism syntax highlighting after HTMX loads content
-                script { 
+                script {
                     (PreEscaped("
                         if (typeof Prism !== 'undefined') {
                             Prism.highlightAll();

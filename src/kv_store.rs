@@ -34,7 +34,7 @@ impl KeyValueStore {
         context: impl Into<String>,
         key: impl Into<String>,
         value: impl Into<String>,
-    ) -> Result<String, String> {
+    ) -> String {
         let mut store = self.store.lock().unwrap();
 
         let context: String = context.into().clone();
@@ -43,29 +43,25 @@ impl KeyValueStore {
             let mut k = HashMap::new();
             k.insert(key.into(), value.into());
             store.insert(context, k);
-            return Ok("Key Set".into());
+            return "Key Set".into();
         };
 
         inner.insert(key.into(), value.into());
 
-        Ok("Key Set".into())
+        "Key Set".into()
     }
 
-    pub fn remove(
-        &self,
-        context: impl Into<String>,
-        key: impl Into<String>,
-    ) -> Result<String, String> {
+    pub fn remove(&self, context: impl Into<String>, key: impl Into<String>) -> String {
         let mut store = self.store.lock().unwrap();
 
         let Some(inner) = store.get_mut(&context.into()) else {
             // no context found, create context
-            return Ok("Key did not exist".into());
+            return "Key did not exist".into();
         };
 
         inner.remove(&key.into());
 
-        Ok("Key Removed".into())
+        "Key Removed".into()
     }
 
     #[allow(dead_code)]
@@ -77,7 +73,7 @@ impl KeyValueStore {
         Ok(s)
     }
 
-    pub fn insert_script(&self, script_with_result: Script) -> Result<String, String> {
+    pub fn insert_script(&self, script_with_result: &Script) -> String {
         self.insert(
             SCRIPT_CONTEXT,
             script_with_result.name(),
