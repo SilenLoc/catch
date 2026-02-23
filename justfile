@@ -4,6 +4,10 @@ mod hurl 'tests/hurl.just'
 run:
     cargo run
 
+kill:
+    #!/usr/bin/env bash
+    lsof -ti:8111 | xargs -r kill -9 || true
+
 alias v := verify
 
 verify:

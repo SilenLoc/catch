@@ -1,6 +1,6 @@
 use crate::{
     kv_store::KeyValueStore,
-    runtime::{self, ScriptType},
+    runtime::{self, ScriptLanguage, ScriptType},
 };
 
 use super::runtime::RuntimeError;
@@ -60,8 +60,9 @@ pub async fn run(
             let result = script_type.run();
             match result {
                 Ok(result) => {
-                    let s = Script::new(script, result.clone());
-                    store.insert_script(s);
+                    let language = script_type.language();
+                    let s = Script::new(script, result.clone(), language);
+                    let _ = store.insert_script(s);
                     HttpResponse::Ok().body(result)
                 }
                 Err(error) => error.respond_to(&req),
@@ -76,15 +77,17 @@ pub struct Script {
     name: String,
     content: String,
     result: String,
+    script_type: ScriptLanguage,
 }
 
 impl Script {
-    pub fn new(content: String, result: String) -> Self {
+    pub fn new(content: String, result: String, script_type: ScriptLanguage) -> Self {
         let name = script_name(&content);
         Script {
             name,
             content,
             result,
+            script_type,
         }
     }
     pub fn name(&self) -> &str {
@@ -97,6 +100,10 @@ impl Script {
 
     pub fn result(&self) -> &str {
         &self.result
+    }
+
+    pub fn script_type(&self) -> &ScriptLanguage {
+        &self.script_type
     }
 
     pub fn as_json(&self) -> String {

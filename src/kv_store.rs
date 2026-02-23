@@ -42,7 +42,7 @@ impl KeyValueStore {
             // no context found, create context
             let mut k = HashMap::new();
             k.insert(key.into(), value.into());
-            store.insert(context.into(), k);
+            store.insert(context, k);
             return Ok("Key Set".into());
         };
 
@@ -68,8 +68,9 @@ impl KeyValueStore {
         Ok("Key Removed".into())
     }
 
+    #[allow(dead_code)]
     pub fn get_script(&self, name: impl Into<String>) -> Result<Script, String> {
-        let Some(json) = self.get(SCRIPT_CONTEXT, &name.into()) else {
+        let Some(json) = self.get(SCRIPT_CONTEXT, name.into()) else {
             return Err("Script not found".into());
         };
         let s = Script::from_json(&json).map_err(|e| e.to_string())?;
@@ -104,7 +105,7 @@ pub async fn get_kv(
         .unwrap();
 
     // check if key exists
-    let Some(value) = store.get(context, &key.clone()) else {
+    let Some(value) = store.get(context, key.clone()) else {
         return HttpResponse::NotFound().body("Key not found");
     };
 
@@ -140,7 +141,7 @@ pub async fn set_kv(
         .to_str()
         .unwrap();
 
-    store.insert(context, key.clone(), value);
+    let _ = store.insert(context, key.clone(), value);
     HttpResponse::Ok().body("Key set")
 }
 
@@ -159,6 +160,6 @@ pub async fn delete_kv(
         .unwrap();
 
     let key: String = key.to_string();
-    store.remove(context, key);
+    let _ = store.remove(context, key);
     HttpResponse::NoContent()
 }

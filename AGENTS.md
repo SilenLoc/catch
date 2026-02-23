@@ -1,5 +1,6 @@
 AGENTS
 ======
+always use just command to verify etc
 You find documentation on how to to do:
 - styling for the html inside skills/t.md
 - for htmx inside skills/t.md
