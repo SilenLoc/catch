@@ -1,5 +1,5 @@
 use actix_web::Result as AwResult;
-use actix_web::{get, web};
+use actix_web::{HttpRequest, get, web};
 use maud::{PreEscaped, html};
 
 use crate::kv_store::KeyValueStore;
@@ -76,7 +76,10 @@ impl ScriptView {
 }
 
 #[get("/ui/scripts")]
-pub async fn script_page(store: web::Data<KeyValueStore>) -> AwResult<maud::Markup> {
+pub async fn script_page(
+    req: HttpRequest,
+    store: web::Data<KeyValueStore>,
+) -> AwResult<maud::Markup> {
     // Get all scripts from the _catch_script context
     let store_snapshot = store.inner().lock().unwrap();
     let scripts: Vec<Script> = store_snapshot
@@ -91,5 +94,12 @@ pub async fn script_page(store: web::Data<KeyValueStore>) -> AwResult<maud::Mark
 
     drop(store_snapshot);
 
-    Ok(ScriptView::render(scripts))
+    let content = ScriptView::render(scripts);
+
+    // Check if this is an htmx request
+    if req.headers().get("HX-Request").is_some() {
+        Ok(content)
+    } else {
+        Ok(super::render_layout(&content))
+    }
 }

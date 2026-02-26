@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use actix_web::Result as AwResult;
-use actix_web::{get, web};
+use actix_web::{HttpRequest, get, web};
 use maud::html;
 
 use crate::kv_store::KeyValueStore;
@@ -30,10 +30,17 @@ impl KeyValueView {
 }
 
 #[get("/ui/kv")]
-pub async fn kv_page(store: web::Data<KeyValueStore>) -> AwResult<maud::Markup> {
+pub async fn kv_page(req: HttpRequest, store: web::Data<KeyValueStore>) -> AwResult<maud::Markup> {
     let kv_snapshot = store.inner().lock().unwrap().clone();
 
-    Ok(KeyValueView::render(&kv_snapshot))
+    let content = KeyValueView::render(&kv_snapshot);
+
+    // Check if this is an htmx request
+    if req.headers().get("HX-Request").is_some() {
+        Ok(content)
+    } else {
+        Ok(super::render_layout(&content))
+    }
 }
 
 /// Attempt to pretty-print a value if it's valid JSON, otherwise return as-is

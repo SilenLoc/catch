@@ -33,20 +33,18 @@ pub fn render_layout(main_content: &maud::Markup) -> maud::Markup {
 
                         nav class="f6" {
                             a class="db pv2 ph2 br2 catch-green bg-black-60 mb2 no-underline bg-animate hover-bg-catch-dark-green hover-white"
-                              href="/ui/kv" hx-get="/ui/kv" hx-target="#feature" hx-swap="innerHTML" hx-trigger="load, click" {
+                              href="/ui/kv" hx-get="/ui/kv" hx-target="#feature" hx-swap="innerHTML" hx-push-url="true" {
                                 span class="dib" { "Key-Value Store" }
                             }
 
-                            a class="db pv2 ph2 br2 catch-green bg-black-60 mb2 no-underline bg-animate hover-bg-catch-dark-green hover-white flex items-center justify-between"
-                              href="/ui/scripts" hx-get="/ui/scripts" hx-target="#feature" hx-swap="innerHTML" {
+                            a class="db pv2 ph2 br2 catch-green bg-black-60 mb2 no-underline bg-animate hover-bg-catch-dark-green hover-white"
+                              href="/ui/scripts" hx-get="/ui/scripts" hx-target="#feature" hx-swap="innerHTML" hx-push-url="true" {
                                 span class="dib" { "Scripts" }
-                                span class="ml2 f7 ttu tracked-mega gold" { "beta" }
                             }
 
-                            a class="db pv2 ph2 br2 catch-green bg-black-60 no-underline bg-animate hover-bg-catch-dark-green hover-white flex items-center justify-between"
-                              href="/ui/proxy" hx-get="/ui/proxy" hx-target="#feature" hx-swap="innerHTML" {
+                            a class="db pv2 ph2 br2 catch-green bg-black-60 no-underline bg-animate hover-bg-catch-dark-green hover-white"
+                              href="/ui/proxy" hx-get="/ui/proxy" hx-target="#feature" hx-swap="innerHTML" hx-push-url="true" {
                                 span class="dib" { "Proxy" }
-                                span class="ml2 f7 ttu tracked-mega gold" { "beta" }
                             }
                         }
                     }

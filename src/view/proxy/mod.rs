@@ -1,5 +1,5 @@
 use actix_web::Result as AwResult;
-use actix_web::{get, web};
+use actix_web::{HttpRequest, get, web};
 use maud::html;
 
 use crate::kv_store::KeyValueStore;
@@ -37,7 +37,10 @@ impl ProxyView {
 }
 
 #[get("/ui/proxy")]
-pub async fn proxy_page(store: web::Data<KeyValueStore>) -> AwResult<maud::Markup> {
+pub async fn proxy_page(
+    req: HttpRequest,
+    store: web::Data<KeyValueStore>,
+) -> AwResult<maud::Markup> {
     // Get all proxy calls from the _catch_proxy context
     let store_snapshot = store.inner().lock().unwrap();
     let proxy_calls: Vec<ProxyCall> = store_snapshot
@@ -55,5 +58,12 @@ pub async fn proxy_page(store: web::Data<KeyValueStore>) -> AwResult<maud::Marku
 
     drop(store_snapshot);
 
-    Ok(ProxyView::render(proxy_calls))
+    let content = ProxyView::render(proxy_calls);
+
+    // Check if this is an htmx request
+    if req.headers().get("HX-Request").is_some() {
+        Ok(content)
+    } else {
+        Ok(crate::view::render_layout(&content))
+    }
 }
