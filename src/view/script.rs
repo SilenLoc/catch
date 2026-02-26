@@ -23,7 +23,7 @@ impl ScriptView {
             } @else {
                 div class="overflow-y-scroll" style="max-height: 80vh;" {
                     @for script in scripts {
-                        section class="bg-dark-gray br3 pa3 pa4-ns mv3 shadow-1" {
+                        section class="bg-dark-gray br3 pa3 pa4-ns mv3 shadow-1 mr4" {
                             div class="flex items-center justify-between mb3 pb2 bb b--black-40" {
                                 h3 class="f5 fw6 light-silver ma0" { (script.name()) }
                                 span class="f7 fw6 ttu tracked ph2 pv1 br2 bg-gold near-black" { (script.language().as_str()) }
@@ -74,7 +74,7 @@ impl ScriptView {
                         if (typeof Prism !== 'undefined') {
                             Prism.highlightAll();
                         }
-                        
+
                         function copyToClipboard(btn, text) {
                             navigator.clipboard.writeText(text).then(function() {
                                 var originalText = btn.textContent;

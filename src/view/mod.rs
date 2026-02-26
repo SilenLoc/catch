@@ -26,7 +26,7 @@ pub fn render_layout(main_content: &maud::Markup) -> maud::Markup {
 
             body class="min-vh-100 bg-near-black near-white sans-serif" {
                 div class="flex min-vh-100" {
-                    aside class="w-100 w5-ns bg-black-90 white ph3 pv4" {
+                    aside class="w-100 mw5-ns bg-black-90 white ph3 pv4" {
                         h1 class="f4 fw6 tracked ttu mb4 moon-gray" { "catch" }
 
                         nav class="f6" {

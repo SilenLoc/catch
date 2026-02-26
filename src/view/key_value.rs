@@ -18,10 +18,12 @@ impl KeyValueView {
                 span class="f6 fw4 moon-gray" { "In-memory namespaces and values" }
             }
 
-            @for (key, value) in kv {
-                section class="bg-dark-gray br3 pa3 pa4-ns mv3 shadow-1" {
-                    h3 class="f6 ttu tracked light-silver ma0 mb3" { (key) }
-                    (render_hash_map(value))
+            div class="overflow-y-auto" style="max-height: calc(100vh - 12rem);" {
+                @for (key, value) in kv {
+                    section class="bg-dark-gray br3 pa3 pa4-ns mv3 shadow-1 mr4" {
+                        h3 class="f6 ttu tracked light-silver ma0 mb3" { (key) }
+                        (render_hash_map(value))
+                    }
                 }
             }
         }

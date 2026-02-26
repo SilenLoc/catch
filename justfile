@@ -10,6 +10,10 @@ kill:
 
 alias v := verify
 
+up:
+    just docker run
+    just hurl test
+
 verify:
     cargo fmt -- --check
     cargo check

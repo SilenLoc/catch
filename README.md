@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="catch_logo.png" alt="Catch Logo" />
+</div>
+
 # catch
 An extension to hurl
 
