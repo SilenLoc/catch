@@ -17,7 +17,7 @@ impl KeyValueView {
         html! {
             (components::page_header::render("Key-Value Store", "In-memory namespaces and values"))
 
-            div class="overflow-y-auto" style="max-height: calc(100vh - 12rem);" {
+            div class="overflow-y-auto" style="max-height: calc(100vh - 8rem);" {
                 @for (key, value) in kv {
                     section class="bg-catch-dark br3 pa3 pa4-ns mv3 shadow-1 mr4" {
                         h3 class="f6 ttu tracked white ma0 mb3" { (key) }
