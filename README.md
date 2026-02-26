@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="catch_logo.png" alt="Catch Logo" />
+  <img src="/assets/catch_logo.png" alt="Catch Logo" />
 </div>
 
 # catch
