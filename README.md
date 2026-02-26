@@ -3,15 +3,17 @@
 </div>
 
 # catch
-An extension to hurl
+An extension to [Hurl](https://hurl.dev)
+
+## How to use
+
+Of course you can go and read the hurl files [here](/tests)
 
 ### Stability
 
-The plan is to stabilize the API one by one:
+I am quite happy where the current HTTP API is. 
+The internal code is unstable and may change without notice.
 
-- Key Value Store -> Unstable
-- Script -> Design
-- Proxy -> Design
 
 ### Dev setup
 
