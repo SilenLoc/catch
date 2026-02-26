@@ -11,6 +11,7 @@ kill:
 alias v := verify
 
 up:
+    just docker stop
     just docker run
     just hurl test
 

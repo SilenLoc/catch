@@ -4,6 +4,7 @@ const HTMX: &str = include_str!("../assets/h.js");
 const PRISM_CSS: &str = include_str!("../assets/prism-tomorrow.min.css");
 const PRISM_JS: &str = include_str!("../assets/prism.min.js");
 const PRISM_JAVASCRIPT_JS: &str = include_str!("../assets/prism-javascript.min.js");
+const FAVICON_ICO: &[u8] = include_bytes!("../assets/favicon.ico");
 
 #[get("/assets/{filename:.*}")]
 pub async fn assets(req: HttpRequest) -> impl Responder {
@@ -25,6 +26,9 @@ pub async fn assets(req: HttpRequest) -> impl Responder {
         "prism-javascript.min.js" => HttpResponse::Ok()
             .content_type("application/javascript; charset=utf-8")
             .body(PRISM_JAVASCRIPT_JS),
+        "favicon.ico" => HttpResponse::Ok()
+            .content_type("image/x-icon")
+            .body(FAVICON_ICO),
         _ => HttpResponse::NotFound().body("Not found"),
     }
 }

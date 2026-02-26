@@ -1,6 +1,7 @@
 use actix_web::Result as AwResult;
 use actix_web::get;
 
+pub mod components;
 pub mod key_value;
 pub mod proxy;
 pub mod script;
@@ -16,6 +17,7 @@ pub fn render_layout(main_content: &maud::Markup) -> maud::Markup {
             head {
                 meta charset="utf-8";
                 title { "catch" }
+                link rel="icon" type="image/x-icon" href="/assets/favicon.ico" {}
                 link rel="stylesheet" href="/assets/t.css" {}
                 script src="/assets/h.js" {}
                 // Prism.js for syntax highlighting (vendored)
@@ -24,24 +26,24 @@ pub fn render_layout(main_content: &maud::Markup) -> maud::Markup {
                 script src="/assets/prism-javascript.min.js" {}
             }
 
-            body class="min-vh-100 bg-near-black near-white sans-serif" {
+            body class="min-vh-100 bg-near-black white sans-serif" {
                 div class="flex min-vh-100" {
                     aside class="w-100 mw5-ns bg-black-90 white ph3 pv4" {
-                        h1 class="f4 fw6 tracked ttu mb4 moon-gray" { "catch" }
+                        h1 class="f4 fw6 tracked ttu mb4 white" { "catch" }
 
                         nav class="f6" {
-                            a class="db pv2 ph2 br2 o-80 light-silver bg-black-60 mb2 no-underline bg-animate hover-bg-dark-green"
+                            a class="db pv2 ph2 br2 catch-green bg-black-60 mb2 no-underline bg-animate hover-bg-catch-dark-green hover-white"
                               href="/ui/kv" hx-get="/ui/kv" hx-target="#feature" hx-swap="innerHTML" hx-trigger="load, click" {
                                 span class="dib" { "Key-Value Store" }
                             }
 
-                            a class="db pv2 ph2 br2 o-80 light-silver bg-black-60 mb2 no-underline bg-animate hover-bg-dark-green flex items-center justify-between"
+                            a class="db pv2 ph2 br2 catch-green bg-black-60 mb2 no-underline bg-animate hover-bg-catch-dark-green hover-white flex items-center justify-between"
                               href="/ui/scripts" hx-get="/ui/scripts" hx-target="#feature" hx-swap="innerHTML" {
                                 span class="dib" { "Scripts" }
                                 span class="ml2 f7 ttu tracked-mega gold" { "beta" }
                             }
 
-                            a class="db pv2 ph2 br2 o-80 light-silver bg-black-60 no-underline bg-animate hover-bg-dark-green flex items-center justify-between"
+                            a class="db pv2 ph2 br2 catch-green bg-black-60 no-underline bg-animate hover-bg-catch-dark-green hover-white flex items-center justify-between"
                               href="/ui/proxy" hx-get="/ui/proxy" hx-target="#feature" hx-swap="innerHTML" {
                                 span class="dib" { "Proxy" }
                                 span class="ml2 f7 ttu tracked-mega gold" { "beta" }
