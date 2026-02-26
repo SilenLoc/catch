@@ -17,8 +17,9 @@ body contains "HTTP proxy and recording"
 
 # Test proxy with target URL including path
 # Request an unmatched route, proxy to /test-target (registered route)
-GET {{target}}/unmatched-route?test=123
-X-Proxy-Target: {{target}}/test-target
+# Normally this would be the actual route but here we are testing that the proxy will call the catch server itself
+GET {{target}}/test-target?test=123
+X-Proxy-Target: {{target}}/_catch/test-target
 HTTP 200
 
 [Asserts]

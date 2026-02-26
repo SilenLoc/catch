@@ -3,7 +3,7 @@ use serde_json::json;
 
 /// Test endpoint that returns request details
 /// Used for testing proxy functionality
-#[get("/test-target")]
+#[get("_catch/test-target")]
 pub async fn test_target(req: HttpRequest) -> HttpResponse {
     let query = req.query_string();
     let method = req.method().to_string();
