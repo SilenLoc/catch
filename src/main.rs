@@ -10,8 +10,10 @@ mod assets;
 mod config;
 mod health;
 mod kv_store;
+mod proxy;
 mod runtime;
 mod script;
+mod test_endpoint;
 mod view;
 
 #[actix_web::main]
@@ -22,13 +24,17 @@ async fn main() -> std::io::Result<()> {
 
     info!("{config}");
 
+    let bind_address = config.adress();
     let data = web::Data::new(KeyValueStore::new());
+    let config_data = web::Data::new(config);
 
     HttpServer::new(move || {
         App::new()
             .app_data(data.clone())
+            .app_data(config_data.clone())
             .service(assets::assets)
             .service(health::health)
+            .service(test_endpoint::test_target)
             .service(kv_store::get_kv)
             .service(kv_store::set_kv)
             .service(kv_store::delete_kv)
@@ -37,8 +43,9 @@ async fn main() -> std::io::Result<()> {
             .service(view::key_value::kv_page)
             .service(view::proxy::proxy_page)
             .service(view::script::script_page)
+            .default_service(web::route().to(proxy::default_proxy))
     })
-    .bind(config.adress())?
+    .bind(bind_address)?
     .run()
     .await
 }

@@ -4,6 +4,7 @@ use std::{collections::HashMap, sync::Mutex};
 use actix_web::{HttpRequest, HttpResponse, Responder, get, http::header::HeaderValue, post, web};
 use serde_json::Value;
 
+use crate::proxy::ProxyCall;
 use crate::script::Script;
 
 pub type KeyValueStoreInner = Mutex<HashMap<String, HashMap<String, String>>>;
@@ -14,6 +15,7 @@ pub struct KeyValueStoreWrapper {
 }
 
 const SCRIPT_CONTEXT: &str = "_catch_script";
+const PROXY_CONTEXT: &str = "_catch_proxy";
 
 impl KeyValueStore {
     pub fn new() -> Self {
@@ -79,6 +81,19 @@ impl KeyValueStore {
             script_with_result.name(),
             script_with_result.as_json(),
         )
+    }
+
+    pub fn insert_proxy_call(&self, proxy_call: &ProxyCall) -> String {
+        self.insert(PROXY_CONTEXT, proxy_call.id(), proxy_call.as_json())
+    }
+
+    #[allow(dead_code)]
+    pub fn get_proxy_call(&self, id: impl Into<String>) -> Result<ProxyCall, String> {
+        let Some(json) = self.get(PROXY_CONTEXT, id.into()) else {
+            return Err("Proxy call not found".into());
+        };
+        let p = ProxyCall::from_json(&json).map_err(|e| e.to_string())?;
+        Ok(p)
     }
 
     pub fn inner(&self) -> &KeyValueStoreInner {

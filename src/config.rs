@@ -1,11 +1,16 @@
 pub struct Server {
     adress: (String, u16),
     log_level: String,
+    proxy_target: Option<String>,
 }
 
 impl Server {
-    pub fn new(adress: (String, u16), log_level: String) -> Self {
-        Server { adress, log_level }
+    pub fn new(adress: (String, u16), log_level: String, proxy_target: Option<String>) -> Self {
+        Server {
+            adress,
+            log_level,
+            proxy_target,
+        }
     }
 
     pub fn adress(&self) -> (String, u16) {
@@ -13,6 +18,9 @@ impl Server {
     }
     pub fn log_level(&self) -> &str {
         &self.log_level
+    }
+    pub fn proxy_target(&self) -> Option<&str> {
+        self.proxy_target.as_deref()
     }
 }
 
@@ -28,7 +36,8 @@ pub fn from_env() -> Server {
         .parse()
         .unwrap_or(8111);
     let log_level = std::env::var("LOG_LEVEL").unwrap_or_else(|_| "info".to_string());
-    Server::new(("0.0.0.0".to_string(), port), log_level)
+    let proxy_target = std::env::var("PROXY_TARGET").ok();
+    Server::new(("0.0.0.0".to_string(), port), log_level, proxy_target)
 }
 
 fn ascii(server: &Server) -> String {
