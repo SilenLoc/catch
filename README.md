@@ -10,9 +10,22 @@ An extension to [Hurl](https://hurl.dev)
 
 ### How to use
 
+#### Docker
+
+Pull the image from GitHub Container Registry:
+
+```sh
+docker pull ghcr.io/silen/catch:latest
+```
+
 If you use docker compose you can run catch as a service beside your service you are testing.
 If you use docker same idea but you handle the lifetime of the service.
+
+#### Cargo
+
 There is no tutorial yet on how to install it with cargo. You will need to be able to install V8 somehow, depending on your environment this can be challenging.
+
+#### Usage with Hurl
 
 For how to use it with Hurl, of course you can go and read the hurl tests [here](/tests)
 
