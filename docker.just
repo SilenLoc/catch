@@ -1,7 +1,7 @@
 image_name := "ghcr.io/silenloc/catch"
 
 @run d="-d": build stop
-    docker run {{d}} --name catch -p 8111:8111 catch
+    docker run {{d}} --name catch -p 8111:8111 {{image_name}}
 
 @stop:
     -docker stop catch
