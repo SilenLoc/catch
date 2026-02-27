@@ -55,22 +55,20 @@ pub async fn run(
     };
 
     let script_type = runtime::ScriptType::try_from(input);
+    let script_type = match script_type {
+        Ok(st) => st,
+        Err(error) => return error.respond_to(&req),
+    };
 
-    match script_type {
-        Ok(script_type) => {
-            let result = script_type.run();
-            match result {
-                Ok(result) => {
-                    let language = script_type.language();
-                    let s = Script::new(script, result.clone(), language);
-                    let _ = store.insert_script(&s);
-                    HttpResponse::Ok().body(result)
-                }
-                Err(error) => error.respond_to(&req),
-            }
-        }
-        Err(error) => error.respond_to(&req),
-    }
+    let result = match script_type.run() {
+        Ok(result) => result,
+        Err(error) => return error.respond_to(&req),
+    };
+
+    let language = script_type.language();
+    let s = Script::new(script, result.clone(), language);
+    let _ = store.insert_script(&s);
+    HttpResponse::Ok().body(result)
 }
 
 #[derive(Debug, Serialize, Deserialize)]

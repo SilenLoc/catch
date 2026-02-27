@@ -5,32 +5,27 @@ use std::path::PathBuf;
 
 pub const STORAGE_DIR: &str = "_catch/files";
 
-fn get_storage_dir() -> PathBuf {
+pub fn get_storage_dir() -> PathBuf {
     PathBuf::from(STORAGE_DIR)
 }
 
-fn ensure_storage_dir() -> std::io::Result<()> {
+pub fn ensure_storage_dir() -> std::io::Result<()> {
     fs::create_dir_all(STORAGE_DIR)
 }
 
-fn get_file_path(filename: &str, custom_path: Option<&str>) -> PathBuf {
-    let storage_dir = get_storage_dir();
+pub fn get_file_path(filename: &str, custom_path: Option<&str>) -> PathBuf {
+    let mut storage_dir = get_storage_dir();
 
     if let Some(custom) = custom_path {
         // Use custom path if provided
-        let path_parts: Vec<&str> = custom.trim_start_matches('/').split('/').collect();
-
-        let mut full_path = storage_dir;
-        for part in path_parts {
+        for part in custom.trim_start_matches('/').split('/') {
             if !part.is_empty() {
-                full_path = full_path.join(part);
+                storage_dir = storage_dir.join(part);
             }
         }
-        full_path.join(filename)
-    } else {
-        // Default behavior: use filename directly in storage directory
-        storage_dir.join(filename)
     }
+
+    storage_dir.join(filename)
 }
 
 #[post("/file/{filename:.*}")]

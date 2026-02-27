@@ -20,6 +20,21 @@ pub struct ProxyCall {
     response_body: String,
 }
 
+fn should_skip_hurl_header(name: &str) -> bool {
+    matches!(name, "host" | "connection" | "content-length") || name.starts_with("x-forwarded")
+}
+
+fn should_forward_header(name: &str) -> bool {
+    name != "host"
+        && name != "connection"
+        && name != "x-proxy-target"
+        && !name.starts_with("x-forwarded")
+}
+
+fn should_forward_response_header(name: &str) -> bool {
+    name != "connection" && name != "transfer-encoding"
+}
+
 impl ProxyCall {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
@@ -117,12 +132,7 @@ impl ProxyCall {
         // Request headers
         for (key, value) in &self.request_headers {
             // Skip certain headers that are connection-specific or auto-generated
-            let key_lower = key.to_lowercase();
-            if key_lower != "host"
-                && key_lower != "connection"
-                && key_lower != "content-length"
-                && !key_lower.starts_with("x-forwarded")
-            {
+            if !should_skip_hurl_header(&key.to_lowercase()) {
                 let _ = writeln!(hurl, "{key}: {value}");
             }
         }
@@ -241,12 +251,7 @@ pub async fn default_proxy(
 
     // Forward headers (except host and connection-related headers)
     for (header_name, header_value) in req.headers() {
-        let name = header_name.as_str();
-        if name != "host"
-            && name != "connection"
-            && name != "x-proxy-target"
-            && !name.starts_with("x-forwarded")
-        {
+        if should_forward_header(header_name.as_str()) {
             forwarded_req =
                 forwarded_req.insert_header((header_name.clone(), header_value.clone()));
         }
@@ -307,9 +312,7 @@ pub async fn default_proxy(
 
     // Forward response headers (except connection-related)
     for (header_name, header_value) in response_headers {
-        let name = header_name.as_str();
-        if name != "connection"
-            && name != "transfer-encoding"
+        if should_forward_response_header(header_name.as_str())
             && let Ok(value) = actix_web::http::header::HeaderValue::from_str(&header_value)
         {
             client_resp.insert_header((

@@ -1,7 +1,7 @@
 use actix_web::{delete, http::header::ContentType};
 use std::{collections::HashMap, sync::Mutex};
 
-use actix_web::{HttpRequest, HttpResponse, Responder, get, http::header::HeaderValue, post, web};
+use actix_web::{HttpRequest, HttpResponse, Responder, get, post, web};
 use serde_json::Value;
 
 use crate::proxy::ProxyCall;
@@ -23,7 +23,16 @@ impl KeyValueStore {
             store: Mutex::new(HashMap::new()),
         }
     }
+}
 
+fn get_context(req: &HttpRequest) -> &str {
+    req.headers()
+        .get("X-Context")
+        .and_then(|h| h.to_str().ok())
+        .unwrap_or("default")
+}
+
+impl KeyValueStore {
     pub fn get(&self, context: impl Into<String>, key: impl Into<String>) -> Option<String> {
         let store = self.store.lock().unwrap();
         store
@@ -107,13 +116,7 @@ pub async fn get_kv(
     key: web::Path<String>,
     store: web::Data<KeyValueStore>,
 ) -> impl Responder {
-    let static_def = &HeaderValue::from_str("default").unwrap();
-    let context = req
-        .headers()
-        .get("X-Context")
-        .unwrap_or(static_def)
-        .to_str()
-        .unwrap();
+    let context = get_context(&req);
 
     // check if key exists
     let Some(value) = store.get(context, key.clone()) else {
@@ -144,13 +147,7 @@ pub async fn set_kv(
     value: String,
     store: web::Data<KeyValueStore>,
 ) -> impl Responder {
-    let static_def = &HeaderValue::from_str("default").unwrap();
-    let context = req
-        .headers()
-        .get("X-Context")
-        .unwrap_or(static_def)
-        .to_str()
-        .unwrap();
+    let context = get_context(&req);
 
     let _ = store.insert(context, key.clone(), value);
     HttpResponse::Ok().body("Key set")
@@ -162,13 +159,7 @@ pub async fn delete_kv(
     key: web::Path<String>,
     store: web::Data<KeyValueStore>,
 ) -> impl Responder {
-    let static_def = &HeaderValue::from_str("default").unwrap();
-    let context = req
-        .headers()
-        .get("X-Context")
-        .unwrap_or(static_def)
-        .to_str()
-        .unwrap();
+    let context = get_context(&req);
 
     let key: String = key.to_string();
     let _ = store.remove(context, key);
