@@ -24,6 +24,7 @@ impl TryFrom<RequestAndScript<'_>> for ScriptType {
         };
         match content_type {
             "application/javascript" => Ok(ScriptType::JavaScript(value.script.to_owned())),
+            "application/x-sh" => Ok(ScriptType::Shell(value.script.to_owned())),
             _ => Err(RuntimeError::UserError(ScriptType::available().join(", "))),
         }
     }
@@ -122,4 +123,5 @@ fn script_name(script_file: &str) -> String {
         .collect::<String>()
         .trim()
         .replace("//", "")
+        .replace('#', "")
 }
