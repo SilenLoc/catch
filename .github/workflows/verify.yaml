@@ -31,7 +31,39 @@ jobs:
       - name: install just
         uses: rezi-labs/install-just@main
 
-      - run: just verify
+      - name: Run Rust checks and tests
+        run: |
+          cargo fmt -- --check
+          cargo check
+          cargo clippy
+          cargo test
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: silenloc
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and test Docker image
+        run: just docker build ci-${{ github.sha }}
+
+      - name: Start Docker container for testing
+        run: just docker run
+
+      - name: Run acceptance tests
+        run: just hurl test
+
+      - name: Stop Docker container
+        if: always()
+        run: just docker stop
+
+      - name: Push Docker image for release
+        if: github.ref == 'refs/heads/main'
+        run: docker push silenloc/catch:ci-${{ github.sha }}
 
   release:
     needs: verify
@@ -66,24 +98,22 @@ jobs:
     needs: [verify, release]
     if: needs.verify.result == 'success' && needs.release.outputs.released == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     permissions:
       contents: read
-      packages: write
-      attestations: write
-      id-token: write
     steps:
-      - uses: actions/checkout@v4
-
-      - name: install just
-        uses: rezi-labs/install-just@main
-
-      - name: Log in to GitHub Container Registry
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: silenloc
+          password: ${{ secrets.DOCKER_TOKEN }}
       
-      - name: Build and push Docker image
-        run: just docker release "${{ needs.release.outputs.version }}"
+      - name: Pull verified image
+        run: docker pull silenloc/catch:ci-${{ github.sha }}
+
+      - name: Retag and push with version and latest
+        run: |
+          docker tag silenloc/catch:ci-${{ github.sha }} silenloc/catch:${{ needs.release.outputs.version }}
+          docker tag silenloc/catch:ci-${{ github.sha }} silenloc/catch:latest
+          docker push silenloc/catch:${{ needs.release.outputs.version }}
+          docker push silenloc/catch:latest
