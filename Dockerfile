@@ -47,11 +47,17 @@ RUN adduser \
     --uid "${UID}" \
     appuser
 
-# Drop privileges for runtime.
-USER appuser
-
 # Copy only the compiled binary from the build stage.
 COPY --from=build /bin/catch /bin/
+
+# Create working directory for file storage that appuser can write to
+RUN mkdir -p /data && chown -R appuser:appuser /data
+
+# Set working directory
+WORKDIR /data
+
+# Drop privileges for runtime.
+USER appuser
 
 # Document the port your app listens on.
 EXPOSE 8111

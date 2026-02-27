@@ -13,9 +13,11 @@ kill:
 alias v := verify
 
 up:
+    just kill
     just docker stop
     just docker run
     just hurl test
+    echo URL: http://localhost:8111
 
 verify:
     cargo fmt -- --check

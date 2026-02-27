@@ -1,8 +1,16 @@
 use super::RuntimeError;
+use crate::file_store::STORAGE_DIR;
+use std::fs;
 use xshell::{Shell, cmd};
 
 pub fn run(script: &str) -> Result<String, RuntimeError> {
     let sh = Shell::new().map_err(|e| RuntimeError::InternalError(e.to_string()))?;
+
+    // Ensure storage directory exists and change to it before executing script
+    fs::create_dir_all(STORAGE_DIR).map_err(|e| {
+        RuntimeError::InternalError(format!("Failed to create storage directory: {e}"))
+    })?;
+    sh.change_dir(STORAGE_DIR);
 
     // Execute the shell script using sh -c
     let output = cmd!(sh, "sh -c {script}")

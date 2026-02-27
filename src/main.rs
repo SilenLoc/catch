@@ -8,6 +8,8 @@ use crate::kv_store::KeyValueStore;
 
 mod assets;
 mod config;
+mod file_store;
+mod file_store_ui;
 mod health;
 mod kv_store;
 mod proxy;
@@ -38,9 +40,15 @@ async fn main() -> std::io::Result<()> {
             .service(kv_store::get_kv)
             .service(kv_store::set_kv)
             .service(kv_store::delete_kv)
+            .service(file_store::upload_file)
+            .service(file_store::download_file)
+            .service(file_store::delete_file)
             .service(script::run)
             .service(view::index)
             .service(view::key_value::kv_page)
+            .service(view::file_store::files_page)
+            .service(file_store_ui::upload_file_ui)
+            .service(file_store_ui::delete_file_ui)
             .service(view::proxy::proxy_page)
             .service(view::script::script_page)
             .default_service(web::route().to(proxy::default_proxy))

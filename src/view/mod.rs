@@ -2,6 +2,7 @@ use actix_web::Result as AwResult;
 use actix_web::get;
 
 pub mod components;
+pub mod file_store;
 pub mod key_value;
 pub mod proxy;
 pub mod script;
@@ -35,6 +36,11 @@ pub fn render_layout(main_content: &maud::Markup) -> maud::Markup {
                             a class="db pv2 ph2 br2 catch-green bg-black-60 mb2 no-underline bg-animate hover-bg-catch-dark-green hover-white"
                               href="/ui/kv" hx-get="/ui/kv" hx-target="#feature" hx-swap="innerHTML" hx-push-url="true" {
                                 span class="dib" { "Key-Value Store" }
+                            }
+
+                            a class="db pv2 ph2 br2 catch-green bg-black-60 mb2 no-underline bg-animate hover-bg-catch-dark-green hover-white"
+                              href="/ui/files" hx-get="/ui/files" hx-target="#feature" hx-swap="innerHTML" hx-push-url="true" {
+                                span class="dib" { "File Store" }
                             }
 
                             a class="db pv2 ph2 br2 catch-green bg-black-60 mb2 no-underline bg-animate hover-bg-catch-dark-green hover-white"
