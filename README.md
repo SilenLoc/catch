@@ -15,7 +15,8 @@ An extension to [Hurl](https://hurl.dev)
 Pull the image from GitHub Container Registry:
 
 ```sh
-docker pull ghcr.io/silen/catch:latest
+docker pull silenloc/catch:latest
+docker run -p 8111:8111 silenloc/catch:latest
 ```
 
 If you use docker compose you can run catch as a service beside your service you are testing.
